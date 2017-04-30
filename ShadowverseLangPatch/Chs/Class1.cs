@@ -33,6 +33,7 @@ namespace Galstars.Extensions
 				if (chsDict != null && chsDict.ContainsKey(key))
 				{
 					outputDict[key] = chsDict[key].ToString();
+					continue;
 				}
 
 				//补充汉化缺失的文本
