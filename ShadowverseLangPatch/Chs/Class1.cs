@@ -88,9 +88,9 @@ namespace Galstars.Extensions
                 var str = objectName.Substring(index + 1);
                 //var t = Resource2.ResourceManager.GetObject(str);
 				var t = ResFileHelper.GetScenarioText(str);
-                if (String.IsNullOrEmpty(t))
+                if (!String.IsNullOrEmpty(t))
                 {
-                    return new MyTextAss((string)t);
+                    return new MyTextAss(t);
                 }
             }
             return Toolbox.ResourcesManager.LoadObject<UnityEngine.Object>(objectName, isServerResources);
