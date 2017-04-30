@@ -56,18 +56,9 @@ namespace Galstars.Extensions
                 request.Send();
             }
             TextAsset asset = Toolbox.ResourcesManager.LoadObject(fileName) as TextAsset;
-            Dictionary<string, string> chsdictionary = null;
-            var str = Resource1.ResourceManager.GetObject(asset.name);
-            if (str != null)
-            {
-                var s = (string)str;
-                if (CustomPreference._localePref == "Eng")
-                {
-                    var regex = new Regex(@"\[u\]\[ffcd45\](.*?)\[\-\]\[\/u\]");
-                    s = regex.Replace(s, "[ffcd45][b]$1[/b][-]");
-                }
-                chsdictionary = JsonMapper.ToObject<Dictionary<string, string>>(s);
-            }
+			//var str = Resource1.ResourceManager.GetObject(asset.name);
+			Dictionary<string, string> chsdictionary = ResFileHelper.GetMasterDict(asset.name);
+			
             smethod_1(idictionary_0, asset, asset.name, isTrimKey, chsdictionary);
         }
 
@@ -75,10 +66,10 @@ namespace Galstars.Extensions
         {
             TextAsset asset = Resources.Load("Json/Text/" + string_4) as TextAsset;
             Dictionary<string, string> chsdictionary = null;
-            var str = Resource1.ResourceManager.GetObject(string_4);
-            if (str != null)
+			//var str = Resource1.ResourceManager.GetObject(string_4);
+			var s = ResFileHelper.GetSystemText(string_4);
+            if (!String.IsNullOrEmpty(s))
             {
-                var s = (string)str;
                 chsdictionary = JsonMapper.ToObject<Dictionary<string, string>>(s);
             }
             smethod_1(dictionary_0, asset, string_4, false, chsdictionary);
@@ -90,8 +81,9 @@ namespace Galstars.Extensions
             {
                 int index = objectName.LastIndexOf("/");
                 var str = objectName.Substring(index + 1);
-                var t = Resource2.ResourceManager.GetObject(str);
-                if (t != null)
+                //var t = Resource2.ResourceManager.GetObject(str);
+				var t = ResFileHelper.GetScenarioText(str);
+                if (String.IsNullOrEmpty(t))
                 {
                     return new MyTextAss((string)t);
                 }
