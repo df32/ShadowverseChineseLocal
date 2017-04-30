@@ -12,10 +12,10 @@ namespace Galstars.Extensions
 {
 	class ResFileHelper
 	{
-		readonly string jsonFolder = "";
-		readonly string masterFolder = "";
-		readonly string scenarioFolder = "";
-		readonly string lngFile = "";
+		string jsonFolder = "";
+		string masterFolder = "";
+		string scenarioFolder = "";
+		string lngFile = "";
 		JsonData lngJson = null;
 
 		Regex uReg = new Regex(@"\[u\]\[ffcd45\](.*?)\[\-\]\[\/u\]");
@@ -30,7 +30,22 @@ namespace Galstars.Extensions
 				CONFIG_FILE);
 
 			if (!File.Exists(fn))
-			{ return; }
+			{
+				File.WriteAllText(fn, @"JsonFolder = 
+MasterFolder = 
+ScenarioFolder = 
+LngFile = 
+");
+			}
+			else
+			{
+				loadConfigFile(fn);
+			}
+			
+		}
+
+		void loadConfigFile(string fn)
+		{
 
 			Regex reg = new Regex("(\\w+)\\s*=\\s*\"?(.+)\"?");
 			var lst = new List<string>();
