@@ -16,7 +16,7 @@ namespace Galstars.Extensions
 		string masterFolder = "";
 		string scenarioFolder = "";
 		string lngFile = "";
-		JsonData lngJson = null;
+		IDictionary lngJson = null;
 
 		Regex uReg = new Regex(@"\[u\]\[ffcd45\](.*?)\[\-\]\[\/u\]");
 
@@ -47,7 +47,7 @@ LngFile =
 		void loadConfigFile(string fn)
 		{
 
-			Regex reg = new Regex("(\\w+)\\s*=\\s*\"?(.+)\"?");
+			Regex reg = new Regex("(\\w+)\\s*=\\s*(.+)");
 			var lst = new List<string>();
 
 			foreach (var ln in File.ReadAllLines(fn))
@@ -59,7 +59,7 @@ LngFile =
 				if (!m.Success) continue;
 
 				var option = m.Groups[1].Value.ToLower();
-				var value = m.Groups[2].Value.Trim();
+				var value = m.Groups[2].Value.Trim('"',' ','\t');
 				if (value == "") continue;
 
 				switch (option)
@@ -91,9 +91,10 @@ LngFile =
 		{
 			var result = new Dictionary<string, string>();
 			//从Chs.lng文件中加载
-			if (lngJson != null)
+			if (lngJson != null && lngJson.Contains(assetName))
 			{
-				IDictionary jsn = lngJson[assetName];
+				IDictionary jsn = (IDictionary)lngJson[assetName];
+
 				if (jsn != null && jsn.Count > 0)
 				{
 					foreach (string k in jsn.Keys)
@@ -115,7 +116,7 @@ LngFile =
 			//从程序集中加载
 			if (String.IsNullOrEmpty(content))
 			{
-				Resource1.ResourceManager.GetString(assetName);
+				content = Resource1.ResourceManager.GetString(assetName);
 			}
 
 			if (!String.IsNullOrEmpty(content))
@@ -152,7 +153,7 @@ LngFile =
 			//从程序集中加载
 			if (String.IsNullOrEmpty(content))
 			{
-				Resource1.ResourceManager.GetString(resName);
+				content = Resource1.ResourceManager.GetString(resName);
 			}
 
 			return content;
