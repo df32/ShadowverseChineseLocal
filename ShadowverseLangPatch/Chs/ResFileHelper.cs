@@ -74,18 +74,17 @@ namespace Galstars.Extensions
 
 		Dictionary<string, string> Get_MasterDict(string assetName)
 		{
+			var result = new Dictionary<string, string>();
 			//从Chs.lng文件中加载
 			if (lngJson != null)
 			{
-				var jsn = lngJson[assetName];
-				if (jsn != null && jsn.IsObject)
+				IDictionary jsn = lngJson[assetName];
+				if (jsn != null && jsn.Count > 0)
 				{
-					var res = new Dictionary<string, string>();
-					foreach (var k in jsn.Keys)
+					foreach (string k in jsn.Keys)
 					{
-						res[k] = jsn[k].ToString();
+						result[k] = jsn[k].ToString();
 					}
-					if (res.Count > 0) return res;
 				}
 			}
 
@@ -104,15 +103,24 @@ namespace Galstars.Extensions
 				Resource1.ResourceManager.GetString(assetName);
 			}
 
-			if (String.IsNullOrEmpty(content)) return null;
-
-			//将下划线转换为加粗
-			if (CustomPreference._localePref == "Eng")
+			if (!String.IsNullOrEmpty(content))
 			{
-				content = uReg.Replace(content, "[ffcd45][b]$1[/b][-]");
+				//将下划线转换为加粗
+				if (CustomPreference._localePref == "Eng")
+				{
+					content = uReg.Replace(content, "[ffcd45][b]$1[/b][-]");
+				}
+
+				var dict = JsonMapper.ToObject<Dictionary<string, string>>(content);
+
+				foreach (string k in dict.Keys)
+				{
+					if (!result.ContainsKey(k))
+						result[k] = dict[k];
+				}
 			}
 
-			return JsonMapper.ToObject<Dictionary<string, string>>(content);
+			return result.Count > 0 ? result : null;
 		}
 
 		string Get_SystemText(string resName)

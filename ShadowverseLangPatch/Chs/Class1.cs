@@ -11,43 +11,47 @@ namespace Galstars.Extensions
 {
     public class LanguageHelperChs
     {
-        private static string string_3 = "Chs";
+        private static string targetLang = "Chs";	//汉化的目标语言
         private static bool flag;
 
-        private static void smethod_1(IDictionary<string, string> idictionary_0, TextAsset textAsset_0, string string_4, bool bool_0, Dictionary<string, string> chsdictionary)
-        {
-            IDictionary dictionary = JsonMapper.ToObject(textAsset_0.ToString())[string_4];
-            IDictionary dictionary2 = (IDictionary)dictionary["Jpn"];
-            IDictionary dictionary3 = null;
-            if (dictionary.Contains(string_3))
-            {
-                dictionary3 = (IDictionary)dictionary[string_3];
-            }
-            else
-            {
-                dictionary3 = (IDictionary)dictionary["Jpn"];
-            }
-            foreach (string str3 in dictionary2.Keys)
-            {
-                string key = !bool_0 ? str3 : str3.Trim();
-                string chs = null;
-                if (chsdictionary != null && chsdictionary.TryGetValue(key, out chs))
-                {
-                    idictionary_0.Add(key, chs);
-                }
-                else
-                {
-                    string str2 = dictionary3.Contains(str3) ? dictionary3[str3].ToString() : "";
-                    if (!string.IsNullOrEmpty(str3) && ((string.IsNullOrEmpty(str2) || ((string_3 == "Eng") && (key.Trim().ToUpper() == str2.Trim().ToUpper()))) || ((string_3 == "Chs") && (key[0] == str2[0]))))
-                    {
-                        str2 = dictionary2[str3].ToString();
-                    }
-                    idictionary_0.Add(key, str2);
-                }
-            }
-        }
+		private static void mergeDict(IDictionary<string,string> outputDict,
+										Dictionary<string, string> chsDict,
+										TextAsset textAsset,
+										string tagName,
+										bool isTrimKey = false)
+		{
+			IDictionary orgRoot = JsonMapper.ToObject(textAsset.ToString())[tagName];
+			IDictionary keySelecter = (IDictionary)orgRoot["Jpn"];
+			IDictionary defaultValues = orgRoot.Contains(targetLang)
+							? (IDictionary) orgRoot[targetLang] 
+							: (IDictionary) orgRoot["Jpn"];
 
-        public static void Wizard_Master_LoadJsonAndParse(IDictionary<string, string> idictionary_0, string fileName, bool isTrimKey)
+			foreach (string k in keySelecter.Keys)
+			{
+				var key = isTrimKey ? k.Trim() : k;
+
+				if (chsDict != null && chsDict.ContainsKey(key))
+				{
+					outputDict[key] = chsDict[key].ToString();
+				}
+
+				//补充汉化缺失的文本
+				var dValue = defaultValues.Contains(k) ? defaultValues[k].ToString() : "";
+				if (!String.IsNullOrEmpty(k))
+				{
+					if (String.IsNullOrEmpty(dValue)
+						|| String.Compare(k.Trim(), dValue, true) == 0
+						|| targetLang == "Chs" && key[0] == dValue[0])
+					{
+						//当TextAsset中的Chs翻译不完整时，使用Jpn
+						dValue = keySelecter[k].ToString();
+					}
+				}
+				outputDict[key] = dValue;
+			}
+		}
+		
+		public static void Wizard_Master_LoadJsonAndParse(IDictionary<string, string> dict, string fileName, bool isTrimKey)
         {
             if (!flag)
             {
@@ -58,21 +62,21 @@ namespace Galstars.Extensions
             TextAsset asset = Toolbox.ResourcesManager.LoadObject(fileName) as TextAsset;
 			//var str = Resource1.ResourceManager.GetObject(asset.name);
 			Dictionary<string, string> chsdictionary = ResFileHelper.GetMasterDict(asset.name);
-			
-            smethod_1(idictionary_0, asset, asset.name, isTrimKey, chsdictionary);
+
+			mergeDict(dict, chsdictionary, asset, asset.name, isTrimKey);
         }
 
-        public static void Wizard_SystemText_LoadAndParse(string string_4, Dictionary<string, string> dictionary_0)
+        public static void Wizard_SystemText_LoadAndParse(string tag, Dictionary<string, string> dict)
         {
-            TextAsset asset = Resources.Load("Json/Text/" + string_4) as TextAsset;
+            TextAsset asset = Resources.Load("Json/Text/" + tag) as TextAsset;
             Dictionary<string, string> chsdictionary = null;
 			//var str = Resource1.ResourceManager.GetObject(string_4);
-			var s = ResFileHelper.GetSystemText(string_4);
+			var s = ResFileHelper.GetSystemText(tag);
             if (!String.IsNullOrEmpty(s))
             {
                 chsdictionary = JsonMapper.ToObject<Dictionary<string, string>>(s);
             }
-            smethod_1(dictionary_0, asset, string_4, false, chsdictionary);
+			mergeDict(dict, chsdictionary, asset, tag, false);
         }
 
         public static UnityEngine.Object LoadObject(string objectName, bool isServerResources = true, bool isIfFindLoad = false)
