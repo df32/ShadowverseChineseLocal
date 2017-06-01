@@ -30,6 +30,6 @@
 
 
 
-暗影之诗 Shadowverse PC+Mac简繁汉化补丁 v5.5
+暗影之诗 Shadowverse PC+Mac简繁汉化补丁 v5.6.1
 ------
 forked from [Leucothea/ShadowverseChineseLocal](https://github.com/Leucothea/ShadowverseChineseLocal)
